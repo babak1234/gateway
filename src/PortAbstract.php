@@ -1,6 +1,7 @@
 <?php
 namespace Larabookir\Gateway;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Larabookir\Gateway\Enum;
 use Carbon\Carbon;
@@ -81,6 +82,15 @@ abstract class PortAbstract
 	protected $trackingCode;
 
 	/**
+	 *
+	 * filter this keys when setting configs
+	 */
+	protected $skipKeys	= [
+		'id',
+		'user_id',
+		'status'
+	];
+	/**
 	 * Initialize of class
 	 *
 	 * @param Config $config
@@ -95,6 +105,41 @@ abstract class PortAbstract
 	/** bootstraper */
 	function boot(){
 
+	}
+	
+	/**
+	 * get user configs from table
+	 * @param type $userId
+	 * @return type
+	 * @throws \Exception
+	 */
+	protected function getUserConfigs($userId)
+	{
+		$userConfig	= DB::table($this->config->get('gateway.table_prefix').$this->portName)
+						->where([
+							['user_id', '=', $userId],
+							['status', '=', 1]
+						])
+						->first()
+						;
+		if(is_null($userConfig)) {
+			throw new \Exception($this->config->get('gateway.user_config_error'));
+		}
+		return $userConfig;
+	}
+	
+	/**
+	 * set user configs
+	 * @param type $userId
+	 */
+	public function loadUserConfig($userId)
+	{
+		$userConfig	= $this->getUserConfigs($userId);
+		foreach ($userConfig as $key=>$value) {
+			if(!in_array($key, $this->skipKeys)) {
+				$this->config->set('gateway.'. strtolower($this->portName).".{$key}", $value);
+			}
+		}
 	}
 
 	function setConfig($config)

@@ -126,7 +126,7 @@ class GatewayResolver
 	 * @param int $port
 	 * @throws PortNotFoundException
 	 */
-	function make($port)
+	function make($port, $userId)
     {
         if ($port InstanceOf Mellat) {
             $name = Enum::MELLAT;
@@ -159,6 +159,7 @@ class GatewayResolver
         $this->port = $port;
         $this->port->setConfig($this->config); // injects config
         $this->port->setPortName($name); // injects config
+		$port->loadUserConfig($userId);
         $this->port->boot();
 
         return $this;

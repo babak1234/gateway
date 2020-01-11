@@ -27,7 +27,26 @@ class Paypal extends PortAbstract implements PortInterface
     protected $shipmentPrice;
     protected $redirectUrl;
 
-
+	/**
+	 * set user configs
+	 * @param type $userId
+	 */
+	public function loadUserConfig($userId)
+	{
+		$userConfig	= $this->getUserConfigs($userId);
+		$this->config->set('gateway.'. strtolower($this->portName).".default_product_name", $userConfig->default_product_name);
+		$this->config->set('gateway.'. strtolower($this->portName).".default_shipment_price", $userConfig->default_shipment_price);
+		$this->config->set('gateway.'. strtolower($this->portName).".client_id", $userConfig->client_id);
+		$this->config->set('gateway.'. strtolower($this->portName).".secret", $userConfig->secret);
+		$this->config->set('gateway.'. strtolower($this->portName).".settings", [
+			'mode'						=> $userConfig->settings_mode,
+			'http.ConnectionTimeOut'	=> $userConfig->settings_http_ConnectionTimeOut,
+			'log.LogEnabled'			=> $userConfig->settings_log_LogEnabled,
+			'log.FileName'	=> $userConfig->log_FileName,
+			'call_back_url'	=> $userConfig->call_back_url,
+			'log.LogLevel'	=> $userConfig->log_LogLevel,
+		]);
+	}
 
     /**
      * {@inheritdoc}
